@@ -1,4 +1,4 @@
-fodaseTrabalho 3 Computação Grafica
+Trabalho 3 Computação Grafica
 
 Caio Viana, David Morosini
 
