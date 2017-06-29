@@ -12,6 +12,8 @@ void tecladoOps(void);
 void draw_circle(float r, cor rgb);
 void desenha_sensores(bool flag);
 //teste
+void desenha_tiros_inimigos(void);
+void cria_tiros_inimigos(void);
 void joystickOPS(void);
 
 
@@ -20,8 +22,8 @@ void load_arena(char * path){ //OK
 	//identificando as dimensoes da arena
 	p_maior = 0;
 	p_menor = 1;
-	for(int i = 1; i < arena.circs.size(); i++){
-		if(arena.circs[i].raio > arena.circs[p_maior].raio){
+	for(int i = 1; i < arena.enemys.size(); i++){
+		if(arena.enemys[i].c.raio > arena.enemys[i].c.raio){
 			p_menor = p_maior;
 			p_maior = i;
 		}
@@ -32,14 +34,14 @@ void load_arena(char * path){ //OK
 	c_arena_centro.g = 1.0;
 	c_arena_centro.b = 1.0;
 
-	arena.circs[p_menor].c = c_arena_centro;
+	arena.enemys[p_menor].c.c = c_arena_centro;
 	//apenas colocando a cor do centro como branca..
 
-	raio_maior = arena.circs[p_maior].raio;
-	raio_menor = arena.circs[p_menor].raio;
+	raio_maior = arena.enemys[p_maior].c.raio;
+	raio_menor = arena.enemys[p_menor].c.raio;
 
-	x_ini = arena.circs[p_maior].t.tx - raio_maior;
-	x_fim = arena.circs[p_maior].t.tx + raio_maior;
+	x_ini = arena.enemys[p_maior].c.t.tx - raio_maior;
+	x_fim = arena.enemys[p_menor].c.t.tx + raio_maior;
 	y_ini = x_ini;
 	y_fim = x_fim;
 
@@ -65,6 +67,8 @@ void desenha(void){
 
 	desenha_tiros();
 
+	desenha_tiros_inimigos();
+
 	desenha_fogs();
 
 	desenha_carro();
@@ -80,6 +84,7 @@ void desenha(void){
 }
 
 //////////////////////////////////// DESENHOS ///////////////////////////////
+
 
 void desenha_sensores(bool flag){
 	if(flag){
@@ -147,10 +152,10 @@ void draw_tires(float larg, float comp, cor rgb){//desenha o centro dos pneus na
 
 void desenha_arena(void){
 
-	for(int i = 0; i < arena.circs.size(); i++){
+	for(int i = 0; i < arena.enemys.size(); i++){
 		glPushMatrix();
-			glTranslatef(arena.circs[i].t.tx, arena.circs[i].t.ty, 0.0);
-			draw_circle(arena.circs[i].raio, arena.circs[i].c);
+			glTranslatef(arena.enemys[i].c.t.tx, arena.enemys[i].c.t.ty, 0.0);
+			draw_circle(arena.enemys[i].c.raio, arena.enemys[i].c.c);
 		glPopMatrix();
 
 	}
@@ -345,6 +350,45 @@ void cria_carro(void){
 	}	
 }
 
+////// tiros
+
+void desenha_tiros_inimigos(void){
+	if(arena.enemys.size() > 0){
+		for(int i = 0; i < arena.enemys.size(); i++){
+			if(!arena.enemys[i].tiros.empty()){
+				for(int j = 0; j < arena.enemys[i].tiros.size(); j++){
+					glPushMatrix();
+						glTranslatef(arena.enemys[i].tiros[j].t.tx, arena.enemys[i].tiros[j].t.ty, 0.0);
+						draw_circle(arena.enemys[i].tiros[j].raio, arena.enemys[i].tiros[j].c);
+					glPopMatrix();
+
+					arena.enemys[i].tiros[j].t.tx += 1.5 * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+					arena.enemys[i].tiros[j].t.ty -= 1.5 * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+		
+				}
+			}			
+		}
+	}
+
+}
+void cria_tiros_inimigos(int arg){
+	for(int i = 0; i < arena.enemys.size(); i++){
+		circ novo;
+		int ang_aux = rand()%361;
+		novo.t.tx = arena.enemys[i].c.t.tx + cos(ang_aux * M_PI / 180.0) * arena.enemys[i].c.raio;
+		novo.t.ty = arena.enemys[i].c.t.ty + sin(ang_aux * M_PI / 180.0) * arena.enemys[i].c.raio;
+		novo.raio = 3;
+		novo.t.rz = ang_aux;
+		novo.c.r = 1.0; novo.c.g = 1.0; novo.c.b = 0.0;
+		arena.enemys[i].tiros.push_back(novo);
+	}
+	glutPostRedisplay();
+	glutTimerFunc(2000, cria_tiros_inimigos, 1);
+
+}
+
+
+
 
 void desenha_tiros(void){
 	if(!arena.cars[0].tiros.empty()){
@@ -470,34 +514,34 @@ void tecladoOps(void){
 			arena.cars[0].rodas_articuldas[0].t.rz += TAXA_ROT_RODA;
 			arena.cars[0].rodas_articuldas[1].t.rz += TAXA_ROT_RODA;
 		}
-		arena.cars[0].acelerar('w', flag_turbo, arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('w', flag_turbo, arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['w'] == true && teclas['d'] == true){
 		if(arena.cars[0].rodas_articuldas[0].t.rz >= -angMaxRoda){
 			arena.cars[0].rodas_articuldas[0].t.rz -= TAXA_ROT_RODA;
 			arena.cars[0].rodas_articuldas[1].t.rz -= TAXA_ROT_RODA;
 		}
-		arena.cars[0].acelerar('w', flag_turbo, arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('w', flag_turbo, arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['s'] == true && teclas['d'] == true){
 		if(arena.cars[0].rodas_articuldas[0].t.rz >= -angMaxRoda){
 			arena.cars[0].rodas_articuldas[0].t.rz -= TAXA_ROT_RODA;
 			arena.cars[0].rodas_articuldas[1].t.rz -= TAXA_ROT_RODA;
 		}
-		arena.cars[0].acelerar('s', flag_turbo, -arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('s', flag_turbo, -arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['s'] == true && teclas['a'] == true){
 		if(arena.cars[0].rodas_articuldas[0].t.rz <= angMaxRoda){
 			arena.cars[0].rodas_articuldas[0].t.rz += TAXA_ROT_RODA;
 			arena.cars[0].rodas_articuldas[1].t.rz += TAXA_ROT_RODA;
 		}
-		arena.cars[0].acelerar('s', flag_turbo, -arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('s', flag_turbo, -arena.cars[0].rodas_articuldas[0].t.rz / TAXA_ROT_CARRO, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['w']){
-		arena.cars[0].acelerar('w', flag_turbo, 0, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('w', flag_turbo, 0, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['s']){
-		arena.cars[0].acelerar('s', flag_turbo,  0, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('s', flag_turbo,  0, raio_menor, raio_maior, arena.enemys);
 	}
 	else if(teclas['a']){
 		if(arena.cars[0].rodas_articuldas[0].t.rz <= angMaxRoda){
@@ -689,7 +733,7 @@ void joystickOPS(void){
 
 		float vel_aux = arena.cars[0].vel_carro;
 		arena.cars[0].vel_carro *= ((z_axis + 300) / 1000.0);
-		arena.cars[0].acelerar('w', btn_l1, ang, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('w', btn_l1, ang, raio_menor, raio_maior, arena.enemys);
 		arena.cars[0].vel_carro = vel_aux;
 	}
 	else if(z_axis < 0){
@@ -701,7 +745,7 @@ void joystickOPS(void){
 		}
 		float vel_aux = arena.cars[0].vel_carro;
 		arena.cars[0].vel_carro *= ((-z_axis + 300) / 1000.0);
-		arena.cars[0].acelerar('s', btn_l1, ang, raio_menor, raio_maior, arena.circs);
+		arena.cars[0].acelerar('s', btn_l1, ang, raio_menor, raio_maior, arena.enemys);
 		arena.cars[0].vel_carro = vel_aux;
 	}else{
 		status = STOP;

@@ -103,7 +103,10 @@ Arena get_arena_svg(char * path, float vel_tiro){
 				c.t.ty = atof(cy);
 				c.c.r = 0.0; c.c.g = 0.0; c.c.b = 1.0;
 				c.tipo = TIPO_PISTA;
-				arena.circs.push_back(c);
+				//arena.circs.push_back(c);
+				Enemy e;
+				e.c = c;
+				arena.enemys.push_back(e);
 
 			}
 			else if(!strcmp(id_c, "Inimigo")){
@@ -113,7 +116,10 @@ Arena get_arena_svg(char * path, float vel_tiro){
 				c.t.ty = atof(cy);
 				c.c.r = 1.0; c.c.g = 0.0; c.c.b = 0.0;
 				c.tipo = TIPO_INIMIGO;
-				arena.circs.push_back(c);
+				//arena.circs.push_back(c);
+				Enemy e;
+				e.c = c;
+				arena.enemys.push_back(e);
 			}
 			else if(!strcmp(id_c, "Jogador")){
 				ESCALA = atof(r)/(dist_centro_rot_canhao + (c_canhao/2.0) + (c_chassi/2.0));				

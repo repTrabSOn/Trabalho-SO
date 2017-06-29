@@ -1,5 +1,11 @@
 #include "globais.h"
 
+class Enemy{
+public:
+	circ c;
+	std::vector<circ> tiros;
+};
+
 class Carro{
 public:
 	std::vector<rect> rodas_articuldas;
@@ -12,13 +18,13 @@ public:
 	std::vector<sensor> sensores;
 	trans t_carro;
 	float vel_carro, vel_tiro, range_tiro;
-	void acelerar(unsigned char key, bool turbo, float rot, float l_inf, float l_sup, std::vector<circ> inimigos);
+	void acelerar(unsigned char key, bool turbo, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos);
 	void limpa_tiros(void);
-	bool colisao(float new_x, float new_y, float rot, float l_inf, float l_sup, std::vector<circ> inimigos);
+	bool colisao(float new_x, float new_y, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos);
 	float dist(float x1, float y1, float x2, float y2);
 };
 
-void Carro::acelerar(unsigned char key, bool turbo, float rot, float l_inf, float l_sup, std::vector<circ> inimigos){
+void Carro::acelerar(unsigned char key, bool turbo, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos){
 	float desloc_x = vel_carro * cos((t_carro.rz + ANG_REF) * M_PI / 180.0);
 	float desloc_y = vel_carro * sin((t_carro.rz + ANG_REF) * M_PI / 180.0);
 
@@ -72,7 +78,7 @@ float Carro::dist(float x1, float y1, float x2, float y2){
 }
 
 
-bool Carro::colisao(float new_x, float new_y, float rot, float l_inf, float l_sup, std::vector<circ> inimigos){
+bool Carro::colisao(float new_x, float new_y, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos){
 	//colisao com os limites da arena
 			std::vector<sensor> s_aux = sensores;
 
@@ -105,15 +111,15 @@ bool Carro::colisao(float new_x, float new_y, float rot, float l_inf, float l_su
 
 	for(int j = 0; j < s_aux.size(); j++){
 		for(int i = 0; i < inimigos.size(); i++){
-			float d = dist(s_aux[j].x + new_x, s_aux[j].y + new_y, inimigos[i].t.tx, inimigos[i].t.ty);
-			if(inimigos[i].tipo == TIPO_PISTA){
+			float d = dist(s_aux[j].x + new_x, s_aux[j].y + new_y, inimigos[i].c.t.tx, inimigos[i].c.t.ty);
+			if(inimigos[i].c.tipo == TIPO_PISTA){
 				if(d - r < l_inf || d + r > l_sup){
 					flagResp = true;
 				}
 
 			}
-			else if(inimigos[i].tipo == TIPO_INIMIGO){
-				if(d - r < inimigos[i].raio){
+			else if(inimigos[i].c.tipo == TIPO_INIMIGO){
+				if(d - r < inimigos[i].c.raio){
 					flagResp  = true;
 				}
 			}
@@ -127,9 +133,14 @@ bool Carro::colisao(float new_x, float new_y, float rot, float l_inf, float l_su
 	return flagResp;
 }
 
+
+
+
+
 class Arena{
 public:
-	std::vector<circ> circs;
+	//std::vector<circ> circs;
+	std::vector<Enemy> enemys;
 	std::vector<rect> rects;
 	std::vector<Carro> cars;
 	trans t_arena;
