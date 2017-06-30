@@ -1,16 +1,5 @@
 #include "globais.h"
 
-
-vector<estrutura> get_estruturas(void);
-int conta_caracter(char * str, char c);
-
-int main(int argc, char * argv[]){
-
-	vector<estrutura> e = get_estruturas();
-
-	return 0;
-}
-
 int conta_caracter(char * str, char c){
 	int cont = 0;
 	for(; *str; str++){
@@ -21,101 +10,77 @@ int conta_caracter(char * str, char c){
 	return cont;
 }
 
-vector<estrutura> get_estruturas(void){
-	char text[200];
-	vector<estrutura> v;
+data get_data(void){
+	char text[TAM_MAX];
 	
-	//representa a quantidade de tabs de cada if que surge no codigo
-	vector<int> if_tabs;
-	//representa a quantidade de tabs de cada else que surge no codigo
-	vector<int> else_tabs;
+	data v;
 
 	int cont = 0;
 
+	char * cadeia_simbolos, * var_auxiliar;
+
 	//fazer a leitura dos semaforos
+	fgets(text, TAM_MAX, stdin);
 
+	cadeia_simbolos = strtok(text, SEPARADOR_FULL);
 
-
+	while(cadeia_simbolos != NULL){
+		v.sem.push_back(atoi(cadeia_simbolos));
+		cadeia_simbolos = strtok(NULL, SEPARADOR_FULL);
+	}
 
 	//leitura dos comandos
 	while(!feof(stdin)){
-		gets(text);
-		char * cadeia_simbolos, var_auxiliar;
+		fgets(text, TAM_MAX, stdin);
 
 		var_auxiliar = text;
-		cadeia_simbolos = strtok(text, " \n\t");
 
-		int qtd_tabs = conta_caracter(var_auxiliar, '\t');
+		cadeia_simbolos = strtok(text, SEPARADOR_FULL);
 
+		int qtd_tabs = conta_caracter(var_auxiliar, SEPARADOR_TAB);
 
-		if(!strcmp(cadeia_simbolos, "thread")){
-			c comando;
-			comando.comando = THREAD;
+		//funciona
+
+		if(!strcmp(cadeia_simbolos, _THREAD)){
+			thread nova;
+			nova.last_index = 0;
+			//captura o "nome da thread"			
+			cadeia_simbolos = strtok(NULL, " ");
+			strcpy(nova.nome, cadeia_simbolos);
+			v.threads.push_back(nova);
 		}
-
-
-		if(!strcmp(cadeia_simbolos, "if")){
-			//novo if encontrado
-			//+ 1 pq a identacao dos comandos internos deverao estar com mais uma tab
-			if_tabs.push_back(qtd_tabs + 1);
+		else if(!strcmp(cadeia_simbolos, _IF)){
+			comando novo;
+			novo.comando = IF;
+			novo.tabs = qtd_tabs;
+			cadeia_simbolos = strtok(NULL, " ");
+			strcpy(novo.condicao, cadeia_simbolos);
+			v.threads[v.threads.size() - 1].comandos.push_back(novo);			
 		}
-		else if(!if_tabs.empty()){
-			if(if_tabs.back() == (qtd_tabs + 1)){
-				//é um comando aninhando dentro do ultimo if
-
-
-			}else{
-				//terminou o ultimo comando if
-				if_tabs.pop_back();
-			}
+		else if(!strcmp(cadeia_simbolos, _ELSE)){
+			comando novo;
+			novo.comando = ELSE;
+			novo.tabs = qtd_tabs;
+			v.threads[v.threads.size() - 1].comandos.push_back(novo);	
 		}
-
-		if(!strcmp(cadeia_simbolos, "else")){
-			else_tabs.push_back(qtd_tabs + 1);
-
+		else if(!strcmp(cadeia_simbolos, _P)){
+			comando novo;
+			novo.comando = P;
+			novo.tabs = qtd_tabs;
+			cadeia_simbolos = strtok(NULL, " ");
+			//qual o semaforo que deu o comando
+			novo.valor = atoi(cadeia_simbolos);
+			v.threads[v.threads.size() - 1].comandos.push_back(novo);	
 		}
-		else if(!else_tabs.empty()){
-			if(else_tabs.back() == (qtd_tabs + 1)){
-				//comando a pertencente de else
-			}else{
-				//fim deste comando else
-				else_tabs.pop_back();
-			}
-		}
-
-
-		while(cadeia_simbolos != NULL){
-			//cout << cadeia_simbolos << endl;
-			cadeia_simbolos = strtok(NULL, " \n\t");
-			cont++;
-		}
-		cout << endl;
+		else if(!strcmp(cadeia_simbolos, _V)){
+			comando novo;
+			novo.comando = V;
+			novo.tabs = qtd_tabs;
+			cadeia_simbolos = strtok(NULL, " ");
+			//qual o semaforo que deu o comando
+			novo.valor = atoi(cadeia_simbolos);
+			v.threads[v.threads.size() - 1].comandos.push_back(novo);	
+		}	
 	}
-
-	cout << cont << " argumentos " << endl;
 	return v;
 }
-
-
-
-
-/*
-
-#include <stdio.h>
-#include <string.h>
-
-int main ()
-{
-  char str[] ="- This, a sample string.";
-  char * pch;
-  printf ("Splitting string \"%s\" into tokens:\n",str);
-  pch = strtok (str," ,.-");
-  while (pch != NULL)
-  {
-    printf ("%s\n",pch);
-    pch = strtok (NULL, " ,.-");
-  }
-  return 0;
-}
-
-*/

@@ -1,0 +1,31 @@
+1	1
+													  
+thread t1
+	P 0
+	V 0
+	P 1
+	V 1
+	if vai_se
+		P 0
+	else
+		P 1
+
+thread r4
+	P 0
+	V 0
+	P 1
+	V 1
+	if fuder
+		P 0
+	else
+		P 1
+
+thread 00p
+	P 0
+	V 0
+	P 1
+	V 1
+	if caralho
+		P 0
+	else
+		P 1
