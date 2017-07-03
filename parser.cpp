@@ -35,11 +35,12 @@ data get_data(void){
 
 		var_auxiliar = text;
 
-		cadeia_simbolos = strtok(text, SEPARADOR_FULL);
+		cadeia_simbolos = strtok(text, " \t");
 
 		int qtd_tabs = conta_caracter(var_auxiliar, SEPARADOR_TAB);
 
 		//funciona
+
 
 		if(!strcmp(cadeia_simbolos, _THREAD)){
 			thread nova;
@@ -57,11 +58,11 @@ data get_data(void){
 			strcpy(novo.condicao, cadeia_simbolos);
 			v.threads[v.threads.size() - 1].comandos.push_back(novo);			
 		}
-		else if(!strcmp(cadeia_simbolos, _ELSE)){
+		else if(!strcmp(cadeia_simbolos, "else")){
 			comando novo;
 			novo.comando = ELSE;
 			novo.tabs = qtd_tabs;
-			v.threads[v.threads.size() - 1].comandos.push_back(novo);	
+			v.threads[v.threads.size() - 1].comandos.push_back(novo);
 		}
 		else if(!strcmp(cadeia_simbolos, _P)){
 			comando novo;
@@ -80,7 +81,8 @@ data get_data(void){
 			//qual o semaforo que deu o comando
 			novo.valor = atoi(cadeia_simbolos);
 			v.threads[v.threads.size() - 1].comandos.push_back(novo);	
-		}	
+		}
+
 	}
 	return v;
 }

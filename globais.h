@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <stack>
 
 #define _THREAD "thread"
 #define _IF "if"
@@ -17,15 +18,23 @@
 #define TAM_MAX 200
 
 
-typedef enum {IF, ELSE, P, V}tipo;
-
 using namespace std;
+
+typedef enum {IF, ELSE, P, V}tipo;
+typedef enum{EMPILHA, DESEMPILHA}acao;
 
 typedef struct Thread thread;
 typedef struct Comandos comando;
 typedef struct Data data;
 
 //thread
+
+typedef struct leitor{
+	acao a;
+	int index;
+	stack<comando> * comandos;
+}leitor;
+
 struct Comandos{
 	char condicao[20];
 	tipo comando;
