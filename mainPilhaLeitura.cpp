@@ -2,6 +2,7 @@
 #include <stack>
 #include "globais.h"
 #include "parser.cpp"
+#include "deadlock.cpp"
 
 
 //Futura função que verificara o deadlock
@@ -81,6 +82,18 @@ bool leComandos (data d){
 	}
 	// Saindo deste for do demonio o vector de pilhas esta pronto pro primeiro teste de deadlock
 	// INSIRA A FUNCAO DE TESTAR DEADLOCK AKI
+	matriz m = cria_matriz_deteccao(leitores, d.sem.size());
+
+	exibe_matriz(m);
+
+	bool resp = percorre_matriz(m);
+
+
+	if(resp){
+		cout << "DEADLOCK DO CARALHO" << endl;
+	}else{
+		cout << "NAO tem deadlock nessa CARALHA" << endl;	
+	}
 
 	// A intenção é fazer um while enquanto a função de deadlock der false ou acabar o vetor de comandos
 

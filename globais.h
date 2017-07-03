@@ -20,6 +20,12 @@
 
 using namespace std;
 
+
+
+typedef int t_data;
+
+typedef vector<vector <t_data> > matriz;
+
 typedef enum {IF, ELSE, P, V}tipo;
 typedef enum{EMPILHA, DESEMPILHA}acao;
 

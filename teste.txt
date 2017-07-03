@@ -1,0 +1,10 @@
+1 1
+
+thread t1
+    P 0
+	if c1
+		P 1
+	else
+		P 0
+	V 0
+	
