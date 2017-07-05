@@ -30,14 +30,13 @@ matriz cria_matriz_deteccao(vector<leitor > threads, unsigned int qdt_recursos){
 
 	int contador = threads.size();
 
-	int i;
+	int i, j;
 	for(i = 0; i < threads.size(); i++){
-		while(!(*threads[i].comandos).empty()){
-			comando c = (*threads[i].comandos).top();
+		for(j = 0; j < (*threads[i].comandos).size(); j++){
+			comando c = (*threads[i].comandos)[j];
 			//marcando a solicitação do recurso
 			resp[i][contador + c.valor] = 1;
 			resp[contador + c.valor][i] = 1;
-			(*threads[i].comandos).pop();
 		}
 	}
 	return resp;

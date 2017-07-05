@@ -16,6 +16,7 @@
 #define SEPARADOR_FULL " \t"
 #define SEPARADOR_TAB '\t'
 #define TAM_MAX 200
+#define MAX 999
 
 
 using namespace std;
@@ -38,7 +39,8 @@ typedef struct Data data;
 typedef struct leitor{
 	acao a;
 	int index;
-	stack<comando> * comandos;
+	int flagV;
+	vector<comando> * comandos;
 }leitor;
 
 struct Comandos{
