@@ -5,11 +5,8 @@
 #include "deadlock.cpp"
 
 
-//Futura função que verificara o deadlock
-void verificaDeadLock(void);
-
-
-leitor *iniLeitor(){
+/// Funcao que inicializa um leitor
+leitor *iniLeitor (void){
 	leitor *novo = (leitor*)malloc(sizeof(leitor));
 	if (novo != NULL){
 		novo->a = EMPILHA;
@@ -20,7 +17,8 @@ leitor *iniLeitor(){
 	return novo;
 }
 
-vector<leitor> iniVetLeitor(int qtd){
+/// Funcao de inicializacao do vetor de leitores
+vector<leitor> iniVetLeitor (int qtd){
 	int i;
 	vector<leitor> novo;
 	for(i = 0; i < qtd; i++){
@@ -30,34 +28,34 @@ vector<leitor> iniVetLeitor(int qtd){
 	return novo;
 }
 
+/// Funcao que varre o vetor de comandos a partir de uma determinada posicao do ELSE em determinada tabulacao
 int procuraElse (vector<comando> v, int index, int qtdTabs){
-	int resp = -1;
-	int i;
-	//printf("-------------PROCURA ELSE---------\n");
+	int resp = -1, i;
 	for (i = index; i < v.size(); i++){
-		//printf("comando: %d  tab: %d\n", v[i].comando, v[i].tabs);
+		/// Verifica se e um comando else e se este e o correto pela tabulacao
 		if (v[i].comando == ELSE && v[i].tabs == qtdTabs)
 			resp = i;
 	}
-	//printf("--------FIM PROCURA ELSE---------\n\n");
 	return resp;
 }
 
+/// Funcao principal que le os comandos da estrutura de dados e testa varias combinacoes
 bool leComandos (data d){
 	int i,j,k;
 	int tabAux = MAX;
 	int termina = 0;
 	bool deadlock = false;
 
-	// Vetor contendo uma pilha para cada thread do vetor de threads
+	/// Vetor contendo uma pilha para cada thread do vetor de threads
 	vector<leitor> leitores = iniVetLeitor(d.threads.size());
 
-	// Percorre os vector para empilhar os processos
 	for(k = 0; termina < d.threads.size() && !deadlock; k++){
 		
+		/// Percorre os vector para empilhar os processos		
 		for (i = 0; i < leitores.size(); i++){
 			
 			printf("\nTHREAD %d\n", i+1);
+			/// Verifica 
 			if (leitores[i].index != MAX)
 				j = leitores[i].index;
 			else
