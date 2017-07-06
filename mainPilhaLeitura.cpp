@@ -44,6 +44,7 @@ bool leComandos (data d){
 	int i,j,k;
 	int tabAux = MAX;
 	int termina = 0;
+	int desemp = 0;
 	bool deadlock = false;
 
 	/// Vetor contendo uma pilha para cada thread do vetor de threads
@@ -97,20 +98,18 @@ bool leComandos (data d){
 					// Verifica se os comandos acabaram
 					if (j == d.threads[i].comandos.size()-1 && leitores[i].flagV == 0){
 						leitores[i].a = DESEMPILHA;
+						desemp++;
 						//printf("Desemp\n");
 						break;
 					}
 				}
-				else if (leitores[i].a == DESEMPILHA){
+				/// Quando a funcao esta em modo desempilha
+				else if (leitores[i].a == DESEMPILHA && desemp >= leitores.size()){
 					
-					//printf("tamanho desse caralho: %d\n", (int)leitores[i].comandos->size());
 					while ( 0 < leitores[i].comandos->size()){
-						//printf("\nAKI\n");
 						// Desempilha ate encontrar um comando IF
 						if (leitores[i].comandos->back().comando == IF){
-							//printf("\nAKI\n");
 							int indElse = procuraElse(d.threads[i].comandos, leitores[i].index, leitores[i].comandos->back().tabs);
-							//printf("indElse: %d\n", indElse);
 							if (indElse != -1){
 								j = indElse;
 								leitores[i].a = EMPILHA;
@@ -127,10 +126,9 @@ bool leComandos (data d){
 							leitores[i].comandos->pop_back();
 						}
 					}
+					/// Verifica se a pilha ja acabou, incrementando o termina em caso positivo
 					if (leitores[i].comandos->size() == 0)
 						termina++;
-
-					//termina++;
 				
 				}
 				else{
@@ -139,6 +137,7 @@ bool leComandos (data d){
 				if (j == d.threads[i].comandos.size()-1 && leitores[i].flagV == 0){
 					if (tabAux != MAX)
 						leitores[i].a = DESEMPILHA;
+						desemp++;
 					break;
 				}
 /*
