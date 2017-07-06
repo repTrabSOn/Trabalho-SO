@@ -33,13 +33,13 @@ vector<leitor> iniVetLeitor(int qtd){
 int procuraElse (vector<comando> v, int index, int qtdTabs){
 	int resp = -1;
 	int i;
-	printf("-------------PROCURA ELSE---------\n");
+	//printf("-------------PROCURA ELSE---------\n");
 	for (i = index; i < v.size(); i++){
-		printf("comando: %d  tab: %d\n", v[i].comando, v[i].tabs);
+		//printf("comando: %d  tab: %d\n", v[i].comando, v[i].tabs);
 		if (v[i].comando == ELSE && v[i].tabs == qtdTabs)
 			resp = i;
 	}
-	printf("--------FIM PROCURA ELSE---------\n\n");
+	//printf("--------FIM PROCURA ELSE---------\n\n");
 	return resp;
 }
 
@@ -47,12 +47,13 @@ bool leComandos (data d){
 	int i,j,k;
 	int tabAux = MAX;
 	int termina = 0;
+	bool deadlock = false;
 
 	// Vetor contendo uma pilha para cada thread do vetor de threads
 	vector<leitor> leitores = iniVetLeitor(d.threads.size());
 
 	// Percorre os vector para empilhar os processos
-	for(k = 0; termina < d.threads.size(); k++){
+	for(k = 0; termina < d.threads.size() && !deadlock; k++){
 		
 		for (i = 0; i < leitores.size(); i++){
 			
@@ -71,7 +72,7 @@ bool leComandos (data d){
 					if (d.threads[i].comandos[j].comando == IF || d.threads[i].comandos[j].comando == P){ //|| (*itComando).comando == V){
 						leitores[i].comandos->push_back(d.threads[i].comandos[j]);
 						leitores[i].index = j;
-						printf("%d/%d  %d-%d\n", j, (int)d.threads[i].comandos.size(), tabAux, d.threads[i].comandos[j].tabs);
+						//printf("%d/%d  %d-%d\n", j, (int)d.threads[i].comandos.size(), tabAux, d.threads[i].comandos[j].tabs);
 						tabAux = MAX;
 					}
 					// Se for V
@@ -98,13 +99,12 @@ bool leComandos (data d){
 					// Verifica se os comandos acabaram
 					if (j == d.threads[i].comandos.size()-1 && leitores[i].flagV == 0){
 						leitores[i].a = DESEMPILHA;
-						printf("Desemp\n");
+						//printf("Desemp\n");
 						break;
 					}
 				}
 				else if (leitores[i].a == DESEMPILHA){
 					
-					printf("\n\nmotherfuker\n\n");
 					//printf("tamanho desse caralho: %d\n", (int)leitores[i].comandos->size());
 					while ( 0 < leitores[i].comandos->size()){
 						//printf("\nAKI\n");
@@ -112,19 +112,15 @@ bool leComandos (data d){
 						if (leitores[i].comandos->back().comando == IF){
 							//printf("\nAKI\n");
 							int indElse = procuraElse(d.threads[i].comandos, leitores[i].index, leitores[i].comandos->back().tabs);
-							printf("indElse: %d\n", indElse);
+							//printf("indElse: %d\n", indElse);
 							if (indElse != -1){
 								j = indElse;
 								leitores[i].a = EMPILHA;
 								leitores[i].index = j+1;
 								tabAux = MAX;
-								//leitores[i].comandos->pop_back();
-								printf("\nAKI2222\n");
 							}
 							else{
-								
 								j = d.threads[i].comandos.size()+1;
-								printf("\nAKI\n");
 							}
 							leitores[i].comandos->pop_back();
 							break;
@@ -164,10 +160,10 @@ bool leComandos (data d){
 
 		exibe_matriz(m);
 
-		bool resp = percorre_matriz(m);
+		deadlock = percorre_matriz(m);
 
 
-		if(resp){
+		if(deadlock){
 			cout << "DEADLOCK DO CARALHO\n\n" << endl;
 		}else{
 			cout << "NAO tem deadlock nessa CARALHA\n\n" << endl;	
