@@ -45,33 +45,36 @@ bool leComandos (data d){
 	int tabAux = MAX;
 	int termina = 0;
 	int desemp = 0;
+	int flag = 0;
 	bool deadlock = false;
 
 	/// Vetor contendo uma pilha para cada thread do vetor de threads
 	vector<leitor> leitores = iniVetLeitor(d.threads.size());
 
-	for(k = 0; termina < d.threads.size() && !deadlock; k++){
-		
+	for(k = 0;  termina < d.threads.size() && !deadlock; k++){
+
+		// Faz uma verificaçao se todas as threads ja terminaram seus comandos
+		if (desemp >= leitores.size())
+				flag = 1;
+			else
+				desemp = 0;
+
 		/// Percorre os vector para empilhar os processos		
 		for (i = 0; i < leitores.size(); i++){
 			
-			printf("\nTHREAD %d\n", i+1);
+			//printf("\nTHREAD %d\n", i+1);
 			/// Verifica 
 			if (leitores[i].index != MAX)
 				j = leitores[i].index;
 			else
 				j = 0;
 
-			//printf("valor teste:%d\n", d.threads[i].comandos[leitores[i].index].comando);
-
 			for ( ; j < d.threads[i].comandos.size(); j++){
 				// 2 casos principais, acao == empilha ou acao == desempilha
 				if (leitores[i].a == EMPILHA && tabAux > d.threads[i].comandos[j].tabs){
-					//printf("tab: %d\n", tabAux);
-					if (d.threads[i].comandos[j].comando == IF || d.threads[i].comandos[j].comando == P){ //|| (*itComando).comando == V){
+					if (d.threads[i].comandos[j].comando == IF || d.threads[i].comandos[j].comando == P){ 
 						leitores[i].comandos->push_back(d.threads[i].comandos[j]);
 						leitores[i].index = j;
-						//printf("%d/%d  %d-%d\n", j, (int)d.threads[i].comandos.size(), tabAux, d.threads[i].comandos[j].tabs);
 						tabAux = MAX;
 					}
 					// Se for V
@@ -81,14 +84,12 @@ bool leComandos (data d){
 						if (leitores[i].flagV == 0){
 							leitores[i].index = j;
 							leitores[i].flagV = 1;
-							//printf("\nAKI\n");
 							break;
 						}
 						// Se sim, faz o ajuste no vector dos semaforos
 						else{
 							d.sem[d.threads[i].comandos[j].valor]++;
 							leitores[i].flagV = 0;
-							//printf("incrementou o vet\n");
 						}
 					}
 					// Ignora os elses
@@ -99,16 +100,15 @@ bool leComandos (data d){
 					if (j == d.threads[i].comandos.size()-1 && leitores[i].flagV == 0){
 						leitores[i].a = DESEMPILHA;
 						desemp++;
-						//printf("Desemp\n");
 						break;
 					}
 				}
 				/// Quando a funcao esta em modo desempilha
-				else if (leitores[i].a == DESEMPILHA && desemp >= leitores.size()){
-					
+				else if ((leitores[i].a == DESEMPILHA) && flag == 1){
 					while ( 0 < leitores[i].comandos->size()){
-						// Desempilha ate encontrar um comando IF
+						/// Desempilha ate encontrar um comando IF
 						if (leitores[i].comandos->back().comando == IF){
+							/// Se tem IF procura o ELSE
 							int indElse = procuraElse(d.threads[i].comandos, leitores[i].index, leitores[i].comandos->back().tabs);
 							if (indElse != -1){
 								j = indElse;
@@ -129,17 +129,18 @@ bool leComandos (data d){
 					/// Verifica se a pilha ja acabou, incrementando o termina em caso positivo
 					if (leitores[i].comandos->size() == 0)
 						termina++;
+				}
 				
-				}
-				else{
-					printf("else ignorado\n");
-				}
 				if (j == d.threads[i].comandos.size()-1 && leitores[i].flagV == 0){
-					if (tabAux != MAX)
+					/// Verifica se nao esta ignorando ELSES
+					if (tabAux != MAX){
 						leitores[i].a = DESEMPILHA;
+					}
+					if (leitores[i].a == DESEMPILHA)
 						desemp++;
 					break;
 				}
+
 /*
 				// So imprime a zuera pra testar
 				printf("comando: %d\n", leitores[i].comandos->back().comando);
@@ -153,6 +154,7 @@ bool leComandos (data d){
 		}
 		// Saindo deste for do demonio o vector de pilhas esta pronto pro primeiro teste de deadlock
 		// INSIRA A FUNCAO DE TESTAR DEADLOCK AKI
+
 		matriz m = cria_matriz_deteccao(leitores, d.sem.size());
 
 		exibe_matriz(m);
@@ -165,6 +167,7 @@ bool leComandos (data d){
 		}else{
 			cout << "NAO tem deadlock nessa CARALHA\n\n" << endl;	
 		}
+		deadlock = false;
 	}
 
 	// A intenção é fazer um while enquanto a função de deadlock der false ou acabar o vetor de comandos
