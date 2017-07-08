@@ -11,12 +11,14 @@ void desenha_fogs(void);
 void tecladoOps(void);
 void draw_circle(float r, cor rgb);
 void desenha_sensores(bool flag);
-//teste
 void desenha_tiros_inimigos(void);
 void cria_tiros_inimigos(void);
 void joystickOPS(void);
 
 
+/*
+	Funcao que carrega as estruturas de dados de arena
+*/
 void load_arena(char * path){ //OK
 	arena = load_config_file(path); //declarada globalmente em "globais.h"
 	//identificando as dimensoes da arena
@@ -48,6 +50,22 @@ void load_arena(char * path){ //OK
 	x_centro = x_ini + raio_maior;
 	y_centro = y_ini + raio_maior;
 
+	//iniciando movimento dos inimigos
+	for(int i = 0; i < arena.enemys.size(); i++){
+		if(arena.enemys[i].c.tipo == TIPO_INIMIGO){
+			if(arena.enemys[i].c.t.tx < x_centro){
+				arena.enemys[i].c.t.rz = 180 - arena.enemys[i].c.t.rz;
+				if(arena.enemys[i].c.t.ty < y_centro){
+					arena.enemys[i].c.t.rz += 90;
+				}
+			}else{
+				if(arena.enemys[i].c.t.ty < y_centro){
+					arena.enemys[i].c.t.rz = 360 - arena.enemys[i].c.t.rz;
+				}
+			}
+		}
+	}
+
 	cria_carro();
 }
 
@@ -55,6 +73,9 @@ void inicializa(void){ //OK
 	gluOrtho2D(x_ini, x_fim, y_ini, y_fim);
 }		
 
+/*
+	Funcao principal de desenhos
+*/
 void desenha(void){
 
 	glClearColor(1.0, 1.0, 1.0, 1.0f);
@@ -79,28 +100,26 @@ void desenha(void){
 		tecladoOps();
 	}
 	
-
 	glutSwapBuffers();	
 }
 
 //////////////////////////////////// DESENHOS ///////////////////////////////
-
-
 void desenha_sensores(bool flag){
 	if(flag){
-		glBegin(GL_LINE_LOOP);
-			float r = (c_chassi/2.0 + c_canhao/2.0 + dist_centro_rot_canhao) * ESCALA;
-			int x = arena.cars[0].sensores[0].x;
-			int y = arena.cars[0].sensores[0].y;
-			glColor3f(0.0, 1.0, 0.0);
-			for(int i = 0; i < NUM_LINHAS; i++){
-				float ang = i * M_PI / 180.0;
-				glVertex3f(x + r * cos(ang), y + r * sin(ang), 0.0);
-			}
-		glEnd();
+		for(int i = 0; i < arena.cars.size(); i++) {
+			glBegin(GL_LINE_LOOP);
+				float r = (c_chassi/2.0 + c_canhao/2.0 + dist_centro_rot_canhao) * ESCALA;
+				int x = arena.cars[i].sensores[0].x;
+				int y = arena.cars[i].sensores[0].y;
+				glColor3f(0.0, 1.0, 0.0);
+				for(int i = 0; i < NUM_LINHAS; i++){
+					float ang = i * M_PI / 180.0;
+					glVertex3f(x + r * cos(ang), y + r * sin(ang), 0.0);
+				}
+			glEnd();
+		}
 	}
 }
-
 
 void draw_circle(float r, cor rgb){ //desenha centro na origem
 	glBegin(GL_POLYGON);
@@ -153,11 +172,16 @@ void draw_tires(float larg, float comp, cor rgb){//desenha o centro dos pneus na
 void desenha_arena(void){
 
 	for(int i = 0; i < arena.enemys.size(); i++){
-		glPushMatrix();
-			glTranslatef(arena.enemys[i].c.t.tx, arena.enemys[i].c.t.ty, 0.0);
-			draw_circle(arena.enemys[i].c.raio, arena.enemys[i].c.c);
-		glPopMatrix();
+		if(arena.enemys[i].c.tipo == TIPO_PISTA || arena.enemys[i].flag_vivo){
+			glPushMatrix();
+				glTranslatef(arena.enemys[i].c.t.tx, arena.enemys[i].c.t.ty, 0.0);
+				draw_circle(arena.enemys[i].c.raio, arena.enemys[i].c.c);
+			glPopMatrix();
 
+			if(arena.enemys[i].c.tipo == TIPO_INIMIGO){
+				arena.enemys[i].movimento();
+			}
+		}
 	}
 
 	for(int i = 0; i < arena.rects.size(); i++){
@@ -171,63 +195,64 @@ void desenha_arena(void){
 }
 
 void desenha_carro(void){
-	glPushMatrix();
-		glTranslatef(arena.cars[0].t_carro.tx, arena.cars[0].t_carro.ty - dist_centro_rot_chassi, 0);
-		glRotatef(arena.cars[0].t_carro.rz, 0, 0, 1);
-		glTranslatef(0.0, dist_centro_rot_chassi, 0.0);
-		glScalef(ESCALA, ESCALA, 1.0);
-
-		
-		if(status == START){
-			int ind = 2; //referente ao indice do detail normal
-			if(flag_turbo){
-				ind = 1; //referente ao indice do detail turbo
-			}
-			glPushMatrix();
-				glTranslatef(arena.cars[0].details[ind].t.tx, arena.cars[0].details[ind].t.ty, 0);
-				glScalef(arena.cars[0].details[ind].t.ex, arena.cars[0].details[ind].t.ey, 1.0);
-				draw_circle(arena.cars[0].details[ind].raio, arena.cars[0].details[ind].c);
-			glPopMatrix();
-		}	
-			
-		for(int i = 0; i < arena.cars[0].partes_estaticas.size(); i++){
-			glPushMatrix();
-				glTranslatef(arena.cars[0].partes_estaticas[i].t.tx, arena.cars[0].partes_estaticas[i].t.ty, 0);
-				glRotatef(arena.cars[0].partes_estaticas[i].t.rz, 0.0, 0.0, 1.0);
-				draw_rect(arena.cars[0].partes_estaticas[i].larg, arena.cars[0].partes_estaticas[i].comp, arena.cars[0].partes_estaticas[i].c);
-			glPopMatrix();
-		}
-		for(int i = 0; i < arena.cars[0].armas.size(); i++){
-			glPushMatrix();
-				glTranslatef(arena.cars[0].armas[i].t.tx, arena.cars[0].armas[i].t.ty, 0);
-				glRotatef(arena.cars[0].armas[i].t.rz, 0.0, 0.0, 1.0);
-				glTranslatef(0.0, dist_centro_rot_canhao, 0.0);
-				draw_rect(arena.cars[0].armas[i].larg, arena.cars[0].armas[i].comp, arena.cars[0].armas[i].c);
-			glPopMatrix();
-		}
-		for(int i = 0; i < arena.cars[0].rodas_estaticas.size(); i++){
-			glPushMatrix();
-				glTranslatef(arena.cars[0].rodas_estaticas[i].t.tx, arena.cars[0].rodas_estaticas[i].t.ty, 0);
-				draw_tires(arena.cars[0].rodas_estaticas[i].larg, arena.cars[0].rodas_estaticas[i].comp, arena.cars[0].rodas_estaticas[i].c);
-			glPopMatrix();
-		}
-		for(int i = 0; i < arena.cars[0].rodas_articuldas.size(); i++){
-			glPushMatrix();
-				glTranslatef(arena.cars[0].rodas_articuldas[i].t.tx, arena.cars[0].rodas_articuldas[i].t.ty, 0);
-				glRotatef(arena.cars[0].rodas_articuldas[i].t.rz, 0.0, 0.0, 1.0);
-				draw_tires(arena.cars[0].rodas_articuldas[i].larg, arena.cars[0].rodas_articuldas[i].comp, arena.cars[0].rodas_articuldas[i].c);
-			glPopMatrix();
-		}		
-
-		//oval
+	for(int j = 0; j < arena.cars.size(); j++){
 		glPushMatrix();
-			glTranslatef(arena.cars[0].details[0].t.tx, arena.cars[0].details[0].t.ty, 0);
-			glScalef(arena.cars[0].details[0].t.ex, arena.cars[0].details[0].t.ey, 1.0);
-			draw_circle(arena.cars[0].details[0].raio, arena.cars[0].details[0].c);
+			glTranslatef(arena.cars[j].t_carro.tx, arena.cars[j].t_carro.ty - dist_centro_rot_chassi, 0);
+			glRotatef(arena.cars[j].t_carro.rz, 0, 0, 1);
+			glTranslatef(0.0, dist_centro_rot_chassi, 0.0);
+			glScalef(ESCALA, ESCALA, 1.0);
+
+			
+			if(status == START){
+				int ind = 2; //referente ao indice do detail normal
+				if(flag_turbo){
+					ind = 1; //referente ao indice do detail turbo
+				}
+				glPushMatrix();
+					glTranslatef(arena.cars[j].details[ind].t.tx, arena.cars[j].details[ind].t.ty, 0);
+					glScalef(arena.cars[j].details[ind].t.ex, arena.cars[j].details[ind].t.ey, 1.0);
+					draw_circle(arena.cars[j].details[ind].raio, arena.cars[j].details[ind].c);
+				glPopMatrix();
+			}	
+				
+			for(int i = 0; i < arena.cars[j].partes_estaticas.size(); i++){
+				glPushMatrix();
+					glTranslatef(arena.cars[j].partes_estaticas[i].t.tx, arena.cars[j].partes_estaticas[i].t.ty, 0);
+					glRotatef(arena.cars[j].partes_estaticas[i].t.rz, 0.0, 0.0, 1.0);
+					draw_rect(arena.cars[j].partes_estaticas[i].larg, arena.cars[j].partes_estaticas[i].comp, arena.cars[j].partes_estaticas[i].c);
+				glPopMatrix();
+			}
+			for(int i = 0; i < arena.cars[j].armas.size(); i++){
+				glPushMatrix();
+					glTranslatef(arena.cars[j].armas[i].t.tx, arena.cars[j].armas[i].t.ty, 0);
+					glRotatef(arena.cars[j].armas[i].t.rz, 0.0, 0.0, 1.0);
+					glTranslatef(0.0, dist_centro_rot_canhao, 0.0);
+					draw_rect(arena.cars[j].armas[i].larg, arena.cars[j].armas[i].comp, arena.cars[j].armas[i].c);
+				glPopMatrix();
+			}
+			for(int i = 0; i < arena.cars[j].rodas_estaticas.size(); i++){
+				glPushMatrix();
+					glTranslatef(arena.cars[j].rodas_estaticas[i].t.tx, arena.cars[j].rodas_estaticas[i].t.ty, 0);
+					draw_tires(arena.cars[j].rodas_estaticas[i].larg, arena.cars[j].rodas_estaticas[i].comp, arena.cars[j].rodas_estaticas[i].c);
+				glPopMatrix();
+			}
+			for(int i = 0; i < arena.cars[j].rodas_articuldas.size(); i++){
+				glPushMatrix();
+					glTranslatef(arena.cars[j].rodas_articuldas[i].t.tx, arena.cars[j].rodas_articuldas[i].t.ty, 0);
+					glRotatef(arena.cars[j].rodas_articuldas[i].t.rz, 0.0, 0.0, 1.0);
+					draw_tires(arena.cars[j].rodas_articuldas[i].larg, arena.cars[j].rodas_articuldas[i].comp, arena.cars[j].rodas_articuldas[i].c);
+				glPopMatrix();
+			}		
+
+			//oval
+			glPushMatrix();
+				glTranslatef(arena.cars[j].details[0].t.tx, arena.cars[j].details[0].t.ty, 0);
+				glScalef(arena.cars[j].details[0].t.ex, arena.cars[j].details[0].t.ey, 1.0);
+				draw_circle(arena.cars[j].details[0].raio, arena.cars[j].details[0].c);
+			glPopMatrix();
+
 		glPopMatrix();
-
-	glPopMatrix();
-
+	}
 	glutPostRedisplay();
 }
 
@@ -366,29 +391,36 @@ void desenha_tiros_inimigos(void){
 					arena.enemys[i].tiros[j].t.ty -= 1.5 * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
 		
 				}
+				arena.enemys[i].limpa_tiros();
 			}			
 		}
 	}
-
 }
+
+void redesenha_inimigo(int arg){
+	if(arg != -1){
+		int inimigo = arg - arena.enemys.size();
+		if(arg >= 0){
+			arena.enemys[inimigo].vida = 3;
+			arena.enemys[inimigo].flag_vivo = true;
+		}else{
+			int time = 1200 + rand()%3500;
+			glutTimerFunc(time, redesenha_inimigo, arena.enemys.size() + inimigo);
+		}
+	}
+}
+
+
 void cria_tiros_inimigos(int arg){
 	for(int i = 0; i < arena.enemys.size(); i++){
-		circ novo;
-		int ang_aux = rand()%361;
-		novo.t.tx = arena.enemys[i].c.t.tx + cos(ang_aux * M_PI / 180.0) * arena.enemys[i].c.raio;
-		novo.t.ty = arena.enemys[i].c.t.ty + sin(ang_aux * M_PI / 180.0) * arena.enemys[i].c.raio;
-		novo.raio = 3;
-		novo.t.rz = ang_aux;
-		novo.c.r = 1.0; novo.c.g = 1.0; novo.c.b = 0.0;
-		arena.enemys[i].tiros.push_back(novo);
+		if(arena.enemys[i].c.tipo == TIPO_INIMIGO){
+			arena.enemys[i].atira(arena.cars[0].t_carro.tx, arena.cars[0].t_carro.ty);
+		}
 	}
+	int time = 1500 + rand()%5000;
+	glutTimerFunc(time, cria_tiros_inimigos, 1);
 	glutPostRedisplay();
-	glutTimerFunc(2000, cria_tiros_inimigos, 1);
-
 }
-
-
-
 
 void desenha_tiros(void){
 	if(!arena.cars[0].tiros.empty()){

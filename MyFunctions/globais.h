@@ -13,7 +13,13 @@
 
 using namespace std;
 
-//DEFINES
+#define PATH_CONFIG "config.xml"
+
+
+typedef enum {TIPO_PISTA, TIPO_LARG_CHEGADA, TIPO_INIMIGO, TIPO_CARRO, TIPO_RODA_SUP, TIPO_RODA_INF,
+			 TIPO_EIXO, TIPO_CHASSI, TIPO_CANHAO, TIPO_CIRC, TIPO_VEL_NORMAL, TIPO_VEL_TURBO}tipo;
+
+/*
 #define TIPO_PISTA 0
 #define TIPO_LARG_CHEGADA 1
 #define TIPO_INIMIGO 2
@@ -26,7 +32,7 @@ using namespace std;
 #define TIPO_CIRC 9
 #define TIPO_VEL_NORMAL 10
 #define TIPO_VEL_TURBO 11
-
+*/
  
 
 //ESTRUTURAS DE DADOS
@@ -58,6 +64,10 @@ typedef struct sensor{
 	float x, y;
 }sensor;
 
+typedef struct params{
+	float vel_tiro_carro;
+	float freq_tiro_inimigo, vel_tiro_inimigo, vel_inimigo;
+}params;
 
 //VARIÁVEIS GLOBAIS DE CARRO
 

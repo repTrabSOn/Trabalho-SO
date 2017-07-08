@@ -2,9 +2,75 @@
 
 class Enemy{
 public:
+	bool flag_vivo, flag_direcao;
+	int id, vida;
+	float vel, vel_tiro, freq_tiro;
 	circ c;
 	std::vector<circ> tiros;
+	void limpa_tiros(void);
+	void movimento(void);
+	void atira(int x, int y);
+	//void especial(void);
 };
+
+void Enemy::atira(int x, int y){
+	circ novo;
+	//int ang_aux = rand()%361;
+	float d = sqrt(pow(c.t.tx - x, 2) + pow(c.t.ty - y, 2));
+	float ang_aux = acos((c.t.ty - y)/d)*180.0/M_PI;
+	novo.t.tx = c.t.tx + cos(ang_aux * M_PI / 180.0) * c.raio;
+	novo.t.ty = c.t.ty + sin(ang_aux * M_PI / 180.0) * c.raio;
+	
+	novo.raio = 3 * ESCALA;
+	novo.t.rz = ang_aux;
+	novo.c.r = 1.0; novo.c.g = 1.0; novo.c.b = 0.0;
+	tiros.push_back(novo);
+}
+
+
+void Enemy::limpa_tiros(void){
+	if(!tiros.empty()){
+		for(int i = 0; i < tiros.size(); i++){
+			float d = sqrt(pow(tiros[i].t.tx - x_centro, 2) + pow(tiros[i].t.ty - y_centro, 2));
+			if(d > raio_maior || d < raio_menor){
+				tiros[i] = tiros[tiros.size() - 1];
+				tiros.pop_back();
+				i--;
+			}
+		}
+	}
+}
+
+void Enemy::movimento(void){
+	float d_x = vel * cos((c.t.rz) * M_PI / 180.0);
+	float d_y = vel * sin((c.t.rz) * M_PI / 180.0);
+
+	float d = sqrt(pow(c.t.tx + d_x - x_centro, 2) + pow(c.t.ty + d_y - y_centro, 2));
+	if(d + c.raio > raio_maior || d - c.raio < raio_menor){
+		flag_direcao = !flag_direcao;
+	}
+
+	//estou indo para direcao do centro
+	if(!flag_direcao){
+		d_x *= -1;
+		d_y *= -1;
+	}
+
+	c.t.tx += d_x;
+	c.t.ty += d_y;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Carro{
 public:
