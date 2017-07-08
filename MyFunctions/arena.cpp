@@ -184,7 +184,7 @@ bool Carro::colisao(float new_x, float new_y, float rot, float l_inf, float l_su
 				}
 
 			}
-			else if(inimigos[i].c.tipo == TIPO_INIMIGO){
+			else if(inimigos[i].flag_vivo && inimigos[i].c.tipo == TIPO_INIMIGO){
 				if(d - r < inimigos[i].c.raio){
 					flagResp  = true;
 				}
