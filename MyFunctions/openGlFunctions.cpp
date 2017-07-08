@@ -416,6 +416,7 @@ void desenha_tiros_inimigos(void){
 			if(!arena.enemys[i].tiros.empty()){
 				for(int j = 0; j < arena.enemys[i].tiros.size(); j++){
 
+<<<<<<< HEAD
 					//Verifica aki a colisao de tiros inimigos com o player
 					if (colidiu){
 						arena.enemys[i].tiros[i] = arena.enemys[i].tiros[arena.enemys[i].tiros.size() - 1];
@@ -431,6 +432,10 @@ void desenha_tiros_inimigos(void){
 						arena.enemys[i].tiros[j].t.tx += arena.enemys[i].vel_tiro * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
 						arena.enemys[i].tiros[j].t.ty -= arena.enemys[i].vel_tiro * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
 					}
+=======
+					arena.enemys[i].tiros[j].t.tx += arena.enemys[i].vel_tiro * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+					arena.enemys[i].tiros[j].t.ty -= arena.enemys[i].vel_tiro * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+>>>>>>> 865e221dad1aea491c5f9c7b80a06ff7ead673a1
 		
 				}
 				arena.enemys[i].limpa_tiros();
