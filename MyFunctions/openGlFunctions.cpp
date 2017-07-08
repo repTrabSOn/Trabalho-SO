@@ -410,15 +410,33 @@ bool detectaColisaoTiroPlayerInimigo (Carro car, circ tiro){
 
 }
 
+bool detectaColisaoTiroInimigoPlayer (Carro car, circ tiro){
+	bool flagResp = false;
+	std::vector<sensor> s_aux = car.sensores;
+	for(int i = 0; i < car.sensores.size(); i++){
+			float d = car.dist(tiro.t.tx, tiro.t.ty, car.sensores[i].x, car.sensores[i].y);
+			if(car.flag_vivo){
+				if(d - tiro.raio < arena.enemys[i].c.raio){
+					flagResp  = true;
+					car.vida--;
+					if (car.vida == 0)
+						car.flag_vivo = false;
+				}
+			}
+
+	}
+	return flagResp;
+
+}
+
 void desenha_tiros_inimigos(void){
 	if(arena.enemys.size() > 0){
 		for(int i = 0; i < arena.enemys.size(); i++){
 			if(!arena.enemys[i].tiros.empty()){
 				for(int j = 0; j < arena.enemys[i].tiros.size(); j++){
 
-<<<<<<< HEAD
 					//Verifica aki a colisao de tiros inimigos com o player
-					if (colidiu){
+					if (detectaColisaoTiroInimigoPlayer(arena.cars[0], arena.enemys[i].tiros[i])){
 						arena.enemys[i].tiros[i] = arena.enemys[i].tiros[arena.enemys[i].tiros.size() - 1];
 						arena.enemys[i].tiros.pop_back();
 						i--;
@@ -432,10 +450,6 @@ void desenha_tiros_inimigos(void){
 						arena.enemys[i].tiros[j].t.tx += arena.enemys[i].vel_tiro * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
 						arena.enemys[i].tiros[j].t.ty -= arena.enemys[i].vel_tiro * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
 					}
-=======
-					arena.enemys[i].tiros[j].t.tx += arena.enemys[i].vel_tiro * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
-					arena.enemys[i].tiros[j].t.ty -= arena.enemys[i].vel_tiro * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
->>>>>>> 865e221dad1aea491c5f9c7b80a06ff7ead673a1
 		
 				}
 				arena.enemys[i].limpa_tiros();
