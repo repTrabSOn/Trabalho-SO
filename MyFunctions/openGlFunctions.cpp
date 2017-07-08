@@ -415,13 +415,22 @@ void desenha_tiros_inimigos(void){
 		for(int i = 0; i < arena.enemys.size(); i++){
 			if(!arena.enemys[i].tiros.empty()){
 				for(int j = 0; j < arena.enemys[i].tiros.size(); j++){
-					glPushMatrix();
-						glTranslatef(arena.enemys[i].tiros[j].t.tx, arena.enemys[i].tiros[j].t.ty, 0.0);
-						draw_circle(arena.enemys[i].tiros[j].raio, arena.enemys[i].tiros[j].c);
-					glPopMatrix();
 
-					arena.enemys[i].tiros[j].t.tx += 1.5 * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
-					arena.enemys[i].tiros[j].t.ty -= 1.5 * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+					//Verifica aki a colisao de tiros inimigos com o player
+					if (colidiu){
+						arena.enemys[i].tiros[i] = arena.enemys[i].tiros[arena.enemys[i].tiros.size() - 1];
+						arena.enemys[i].tiros.pop_back();
+						i--;
+					}else{
+
+						glPushMatrix();
+							glTranslatef(arena.enemys[i].tiros[j].t.tx, arena.enemys[i].tiros[j].t.ty, 0.0);
+							draw_circle(arena.enemys[i].tiros[j].raio, arena.enemys[i].tiros[j].c);
+						glPopMatrix();
+
+						arena.enemys[i].tiros[j].t.tx += arena.enemys[i].vel_tiro * sin((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+						arena.enemys[i].tiros[j].t.ty -= arena.enemys[i].vel_tiro * cos((arena.enemys[i].tiros[j].t.rz) * M_PI / 180.0);
+					}
 		
 				}
 				arena.enemys[i].limpa_tiros();
@@ -445,12 +454,14 @@ void redesenha_inimigo(int arg){
 
 
 void cria_tiros_inimigos(int arg){
+	int time = 0;
 	for(int i = 0; i < arena.enemys.size(); i++){
 		if(arena.enemys[i].c.tipo == TIPO_INIMIGO && arena.enemys[i].flag_vivo){
 			arena.enemys[i].atira(arena.cars[0].t_carro.tx, arena.cars[0].t_carro.ty);
+			time = 1 / arena.enemys[i].freq_tiro;
 		}
 	}
-	int time = 1500 + rand()%5000;
+	//int time = 1500 + rand()%5000;
 	glutTimerFunc(time, cria_tiros_inimigos, 1);
 	glutPostRedisplay();
 }

@@ -80,6 +80,8 @@ Arena get_arena_svg(char * path, params p){
 				c.vel_tiro = p.vel_tiro_carro;
 				c.t_carro.tx = atof(cx);
 				c.t_carro.ty = atof(cy);
+				c.flag_vivo = true;
+				c.vida = 3;
 				arena.cars.push_back(c);
 			}
 		}
@@ -97,6 +99,7 @@ Arena get_arena_svg(char * path, params p){
 			r.larg = atof(largura);
 			r.t.tx = atof(x) + r.larg / 2.0;
 			r.t.ty = atof(y) + r.comp / 2.0;
+			r.c.r = 0.0; r.c.g = 0.0; r.c.b = 0.0;		
 			arena.rects.push_back(r);
 		}
 		principal = principal -> NextSiblingElement();

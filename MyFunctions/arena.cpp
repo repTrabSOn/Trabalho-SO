@@ -18,10 +18,22 @@ void Enemy::atira(int x, int y){
 	//int ang_aux = rand()%361;
 	float d = sqrt(pow(c.t.tx - x, 2) + pow(c.t.ty - y, 2));
 	float ang_aux = acos((c.t.ty - y)/d)*180.0/M_PI;
+
+	if(c.t.tx < x){
+		ang_aux = 180 - ang_aux;
+		if(c.t.ty < y){
+			ang_aux += 90;
+		}
+	}else{
+		if(c.t.ty < y){
+			ang_aux = 360 - c.t.rz;
+		}
+	}		
+
 	novo.t.tx = c.t.tx + cos(ang_aux * M_PI / 180.0) * c.raio;
 	novo.t.ty = c.t.ty + sin(ang_aux * M_PI / 180.0) * c.raio;
-	
-	novo.raio = 3 * ESCALA;
+
+	novo.raio = 3 * 1.0/(float)ESCALA;
 	novo.t.rz = ang_aux;
 	novo.c.r = 1.0; novo.c.g = 1.0; novo.c.b = 0.0;
 	tiros.push_back(novo);
@@ -62,18 +74,10 @@ void Enemy::movimento(void){
 
 
 
-
-
-
-
-
-
-
-
-
-
 class Carro{
 public:
+	bool flag_vivo;
+	int vida;
 	std::vector<rect> rodas_articuldas;
 	std::vector<rect> rodas_estaticas;
 	std::vector<rect> partes_estaticas;
@@ -88,6 +92,7 @@ public:
 	void limpa_tiros(void);
 	bool colisao(float new_x, float new_y, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos);
 	float dist(float x1, float y1, float x2, float y2);
+	bool colisao_tiros();
 };
 
 void Carro::acelerar(unsigned char key, bool turbo, float rot, float l_inf, float l_sup, std::vector<Enemy> inimigos){
